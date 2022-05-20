@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://wangxin688.github.io</id>
+    <title>Jeffry&apos;s Blog</title>
+    <updated>2022-05-20T14:34:06.808Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://wangxin688.github.io"/>
+    <link rel="self" href="https://wangxin688.github.io/atom.xml"/>
+    <subtitle>网络工程师开发之路</subtitle>
+    <logo>https://wangxin688.github.io/images/avatar.png</logo>
+    <icon>https://wangxin688.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2022, Jeffry&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[NetDevOps-工程实践-脚手架篇]]></title>
+        <id>https://wangxin688.github.io/post/netdevops-gong-cheng-shi-jian-jiao-shou-jia-pian/</id>
+        <link href="https://wangxin688.github.io/post/netdevops-gong-cheng-shi-jian-jiao-shou-jia-pian/">
+        </link>
+        <updated>2022-05-20T14:12:56.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>在实际开发中，接手多个开发项目往往都会设计比较多重复的代码编写，同时也会有一些如何形成一套工程实践的脚手架，以来</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[NetDevOps RestFramework后端--FastAPI教程(2)]]></title>
+        <id>https://wangxin688.github.io/post/netdevops-restframework-hou-duan-fastapi-jiao-cheng-2/</id>
+        <link href="https://wangxin688.github.io/post/netdevops-restframework-hou-duan-fastapi-jiao-cheng-2/">
+        </link>
+        <updated>2022-05-20T13:44:48.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>开发之前先了解web框架中关于http部分的基础概念，查漏补缺</p>
+</blockquote>
+<h2 id="路径">路径</h2>
+<p>即一个详细的URL路径, 如 <code>https://www.baidu.com/</code>, '127.0.0.1:800/api/v1/docs'</p>
+<h3 id="路径参数">路径参数</h3>
+<p>如url中需要传入具体的参数，如前文中提到的{skills},</p>
+<pre><code class="language-python">@app.get('/host/{hostname}')
+def get_host(hostname: str):
+    return {&quot;hostnam&quot;: hostname}
+@app.get('/datacenter/{datacenter_name}')
+def get_datacenter(datacenter_name: str):
+    return {&quot;datacenter&quot;: datacenter_name}
+</code></pre>
+<h3 id="查询参数">查询参数</h3>
+<p>经常看到<code>?limit=10&amp;offset=0</code></p>
+<pre><code class="language-python">@app.get(&quot;/host/&quot;)
+def get get_hosts(limit: Optional[int] = 10, offset: Optional[int]=0):
+    return db_session.execute(select(Host).limit(limit).offset(offset).scalars().all()
+</code></pre>
+<h3 id="请求体">请求体</h3>
+<p>客户端发数据给服务器，数据以请求体的形式发送。服务器返回响应，以响应体的形式返回。<br>
+通常请求体不用get方式发送，只能以post，put等方式发送。</p>
+<pre><code class="language-python">from typing import Optional
+
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+class Host(BaseModel):
+    hostname: str
+    management_ip: str
+    platform: str
+    ssh_port: Optional[int] = 22
+
+app = FastAPI()
+
+@app.post('/host/')
+def create_host(host: Host):
+    return host
+
+if __name__ == &quot;__main__&quot;:
+    import uvicorn
+    uvicorn.run(app, host='127.0.0.1', port=8080, debug=True)
+</code></pre>
+<p>测试<br>
+<img src="https://wangxin688.github.io/post-images/1653055898832.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[NetDevOps RestFramework后端--FastAPI教程(1)]]></title>
+        <id>https://wangxin688.github.io/post/netdevops-restframework-hou-duan-fastapi-jiao-cheng-1/</id>
+        <link href="https://wangxin688.github.io/post/netdevops-restframework-hou-duan-fastapi-jiao-cheng-1/">
+        </link>
+        <updated>2022-05-19T15:26:06.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>开始前叨叨几句，在进行web后端开发的前期，面临过技术框架选型的纠结，前面主要使用Django和Flask做接口开发。Django作为最流行的python web框架之一，生态极为完善，社区轮子也非常多，但是框架本身比较笨重。Flask给与了开发者极大的灵活度，学习门槛也比较，当前社区生态也比较完善。<br>
+作为python web框架的新贵，FastAPI面世的时间近4年，优雅的设计(给予starlette和pydantic)和高性能从一开始就吸引了我，本着喜欢折腾的性格，果断入坑了FastAPI。</p>
+</blockquote>
+<h2 id="说说我当前使用fastapi的关键优势点">说说我当前使用FastAPI的关键优势点</h2>
+<ul>
+<li>High Performance: 基于Starlette和Pydantic, Starlette的作者也是DRF(Django Restframework)的作者，源码写的非常优雅。基于pydantic可以做严格的数据校验，这在web开发层面提供了非常好的约束，防止各种非法参数和类型输入</li>
+<li>入门简单，学习曲线比较平滑，基本和flask一样，DIY的空间非常大，同时入门非常简单，如果写一点比较小的接口需求，开发效率非常高</li>
+<li>自动生成OpenAPI文档</li>
+<li>良好的代码提示和自动补全</li>
+</ul>
+<h2 id="demo工程">Demo工程</h2>
+<h3 id="开发环境和包安装">开发环境和包安装</h3>
+<pre><code>mkdir fastapi-demo  
+poetry init  # 基于poetry的venv, 一路回车
+poetry shell
+poetry add fastapi, uvicorn  
+</code></pre>
+<h3 id="demopy编写">demo.py编写</h3>
+<p>最简短5行代码就能实现一个API接口的编写，极为轻量, 入门教程可以参考<a href="https://fastapi.tiangolo.com/zh/">FastAPI官网</a></p>
+<pre><code class="language-python">from typing import Optional
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get(&quot;/&quot;)
+def hello():
+    return {&quot;Hello&quot;: &quot;Network Engineer&quot;}
+
+@app.get('/netops/{skills}')
+def get_skills(skills: Optional[str]='python'):
+    return {&quot;netops skills&quot;: skills}
+
+if __name__ == &quot;__main__&quot;:
+    import uvicorn
+    uvicorn.run(app, host='localhost', port=8080, debug=True)
+</code></pre>
+<p>代码运行后浏览器打开http://127.0.0.1:8080/docs，就能看到自动生成的交互式OpenAPI文档<br>
+<img src="https://wangxin688.github.io/post-images/1652976245430.png" alt="" loading="lazy"></p>
+<h3 id="关于uvicron">关于uvicron</h3>
+<ul>
+<li>基于uvloop和httptools构建的ASGI服务器，速度非常快，如果纯后端不涉及静态文件，简单的场景可以无需使用nginx</li>
+<li>uvicron本身并不是web框架，而是一个ASGI的服务器，对应的有WSGI</li>
+<li>starlette和fastapi推荐使用uvicron作为服务器<br>
+以命令行启动示例</li>
+</ul>
+<pre><code>uvicorn demo:app --host 127.0.0.1 --port 8080 --reload 
+# --host指定host
+# --port指定端口
+# --reload 开启debug模式，代码发生变化保存时自动重启app
+# --log-level, 设置日志级别，默认info(debug, info, warn....)
+</code></pre>
+<p>介绍两个比较特别的参数，主要用LB做代理转发的场景（浏览器X-forward），需要获取客户端真实IP的场景<br>
+--proxy-headers<br>
+--forwarded-allow-ips</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Python ORM: SQLAlchemy 1.4/2.0教程]]></title>
+        <id>https://wangxin688.github.io/post/sqlalchemy/</id>
+        <link href="https://wangxin688.github.io/post/sqlalchemy/">
+        </link>
+        <updated>2022-05-19T15:10:39.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>国际惯例先BB下： 为什么要用ORM? 1. 简单的将就是想偷懒，不想写sql  2. Pure python, 对于一些不太复杂的需求，ORM完全够用，简单易懂（小声BB：CRUD能复杂到哪里去？）3. 避免sql注入攻击</p>
+</blockquote>
+<h2 id="why-orm">Why ORM?</h2>
+<p>优点</p>
+<ul>
+<li>面向对象，语句清晰, python中一个类对应DB一张表</li>
+<li>方便动态构造语句，对于不同的表的相同操作采用多态实现更优雅</li>
+<li>一定程度方便重构数据层『比如改表名，字段名等』</li>
+<li>设置hook函数<br>
+缺点</li>
+<li>不太容易处理复杂查询语句</li>
+<li>性能较直接用SQL差</li>
+</ul>
+<h2 id="python-orm流行度和性能对比">python ORM流行度和性能对比</h2>
+<h3 id="1-sqlalchemy">1. <a href="https://github.com/sqlalchemy/sqlalchemy">sqlalchemy</a></h3>
+<p>SQLAlchemy 是 Python 生态系统中最流行的 ORM。功能强大齐全，SQLAlchemy 设计非常优雅，分为了两部分——底层的 Core 和上层的传统 ORM。在 Python 乃至其他语言的大多数 ORM 中，都没有实现很好的分层设计， 比如 django 的 ORM，数据库链接和 ORM 本身完全混在一起。</p>
+<h3 id="2-tortoise-orm">2. <a href="https://github.com/coleifer/peewee">tortoise-orm</a></h3>
+<p>受django启发，异步生态的ORM，比较年轻的项目</p>
+<h3 id="3-peeweee">3. <a href="https://github.com/coleifer/peewee">peeweee</a></h3>
+<p>简单易用的小型ORM，易于学习与使用</p>
+<h3 id="4-sqlmodel">4. <a href="https://github.com/tiangolo/sqlmodel">sqlmodel</a></h3>
+<p>FastAPI作者基于pydantic和sqlalchemy构建了sqlmodel, 笔者也尝试进行了深度使用，在使用便利性，代码提示和自动补全方面有比较大的优势，但和alembic结合仍然有些bug以及一些feature缺失，同时文档和生态不够完善</p>
+<h3 id="5-django-orm">5. django ORM</h3>
+<p>django生态中的自带ORM<br>
+最后贴一张性能跑分<br>
+<img src="https://wangxin688.github.io/post-images/1652973727220.png" alt="" loading="lazy"></p>
+<h2 id="sqlalchemy架构">SQLAlchemy架构</h2>
+<p><img src="https://wangxin688.github.io/post-images/1652973738464.png" alt="" loading="lazy"><br>
+网上关于sqlalchemy的教程大都是基于1.3之前的版本，最新的1.4以及在开发中2.0版本教程很少，本文基于1.4/2.0版本</p>
+<h3 id="core">Core</h3>
+<p>Core层主要实现客户端的连接池，RDBMS通常不适用短连接的方式，大都使用连接池的方式来进行DB访问。</p>
+<ul>
+<li>客户端连接池：作为第三方库引入代码中, 如sqlalchemy的连接池</li>
+<li>服务端，连接池中间件，给短连接每次分配一个长链接复用</li>
+</ul>
+<h2 id="20-教程">2.0 教程</h2>
+<blockquote>
+<p>前面BB了这么多进入正题<br>
+涉及类容：创建对象-&gt;建立连接池-&gt;事务-&gt;外键（一对多，多对多）-&gt; CRUD-&gt;alembic版本管理-&gt;异步</p>
+</blockquote>
+<h3 id="创建对象">创建对象</h3>
+<pre><code class="language-python"># models.py
+from typing import Any, Cast
+from datetime import datetime
+from sqlalchemy import Integer, Column, String, func, Text, Binary
+from sqlalchemy.orm import declarative_base, relationship, deferred
+
+Base = cast(Any, declarative_base())
+
+class Site(Base):
+    __tablename__ = &quot;network_sites&quot;
+    id = Column(Integer, primary_key=True)
+    site_code = Column(String(30), unique=True, nullable=False, index=True)
+    site_name = Column(String(30))
+    status = Column(String)
+    # defferd关键词，延迟列加载允许仅在直接访问时加载表的特定列，而不是在使用查询实体时加载 Query。如果要避免在不需要时将大型文本或二进制字段加载到内存中时，”
+    description = deferred(Column(Text))
+    # 存储二进制的图片
+    topology = deffered(Column(Binary))
+    # 默认值，注意传递的是函数，不是现在的时间
+    created_at = Column(DateTime(Timezone=True), default=datetime.now)
+    # 或者使用服务器默认值，但是必须在表创建的时候就设置好，会成为表的 schema 的一部分
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # 对象更新时候自动修改update_time为当前时间
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    # 外键做反向查询引用支持backref和back_populate两种方式，backref只需要父类声明，back_populate需要在两个类同时声明，为了更加符合pythonic的写法，采用显示声明的方式在两个类同时定义
+    hosts = relationship('Host', back_populate='network_sites', on_delete='all, cascade')
+    
+    # 原始查询返回是一个对象，可读性较差，使用__repr__方法替换名称
+    def __repr__(self):
+        return f'Site: {site_code}-{site_name}'
+    
+    # 序列化tuple对象为dict
+    @property
+    def serialize(self):
+        return {
+            &quot;id&quot;: self.id,
+            &quot;site_code&quot;: self.site_code,
+            &quot;site_name&quot;: self.site_name,
+            &quot;description&quot;: self.description,
+            &quot;topology&quot;: self.topology,
+            &quot;create_at&quot;: self.create_at,
+            &quot;update_at&quot;: self.update_at,
+        }
+
+class Host(Base):
+     __tablename__ = &quot;network_sites&quot;
+    id = Column(Integer, primary_key=True)
+    hostname = Column(String(30), unique=True, nullable=False, index=True)
+    management_ip = Column(String(30), comment=&quot;管理IP&quot;)
+    device_type = Column(String(30))
+    manufacture = Column(String)
+    description = deferred(Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    # 对象更新时候自动修改update_time为当前时间
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    site_id = Column(Integer, ForeignKey('network_sites.id', ondelete=&quot;CASCADE&quot;))
+    site = relationship('Site', back_populate='network_sites', overlaps='network_sites')
+
+    def __str__(self):
+        return f'Host: {hostname}'
+
+# 多对多模型需要创建一个关联表
+# 关联表
+class UserPermissions(Base):
+    __tablename__ = 'user_permissions'
+    id = Column(Integer, primary_key=True)
+    # 同样用 foreign key 指定外键
+    user_id = Column(Integer, ForeignKey('users.id'))
+    permission_id = Column(String, ForeignKey('permissions.id'))
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    # 使用 secondary 指定关联表，同样用 overlaps 指定对应模型中的字段
+    permissions = relationship('Permission', secondary=&quot;user_permissions&quot;, overlaps=&quot;users&quot;)
+
+class Permission(Base):
+    __tablename__ = 'permissions'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    # 同上
+    users = relationship('User', secondary=&quot;user_permissions&quot;, overlaps=&quot;permissions&quot;)
+复制代码
+</code></pre>
+<h3 id="创建连接池">创建连接池</h3>
+<pre><code class="language-python"># db_session.py
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm.session import sessionmaker
+
+async_sqlalchemy_database_uri =&quot;postgresql+asyncpg://user:password@localhost/netdevops&quot;
+# 异步数据库连接池会话
+async_engine = create_async_engine(async_sqlalchemy_database_uri, pool_pre_ping=True)
+async_session = sessionmaker(async_engine, expire_on_commit=False, class_=AsyncSession)
+
+sqlalchemy_database_uri = create_engine(&quot;sqlite:///:memory:&quot;, echo=True, future=True)
+# 同步数据库连接池， Session不是线程安全的，web框架需要在每个请求开始获取一个session
+engine = create_engine(sqlalchemy_database_uri, pool_pre_ping=True)
+new_session = sessionmaker(engine, expire_on_commit=False)
+复制代码
+</code></pre>
+<h3 id="创建数据库表和crud">创建数据库表和CRUD</h3>
+<pre><code class="language-python"># create_table.py
+from .models import Site,Host,User,Permission
+from .db_session import engine, new_session
+
+# 调用 create_all 创建所有模型
+Base.metadata.create_all(engine)
+
+# 如果只需要创建一个模型
+User.__table__.create(engine)
+
+# CRUD, session 不是线程安全的。但是一般情况下，web 框架应该在每个请求开始时获取一个 session， 所以也不是问题。
+with Session(engine) as session:
+    session.add(foo)
+    session.commit()
+
+# 还可以使用 sessionmaker 来创建一个工厂函数，这样就不用每次都输入参数了
+
+from sqlachemy.orm import sessionmaker
+new_session = sessionmaker(engine)
+
+with new_session() as session:
+    ...
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[NetDevOps开发环境篇]]></title>
+        <id>https://wangxin688.github.io/post/devlopment-env/</id>
+        <link href="https://wangxin688.github.io/post/devlopment-env/">
+        </link>
+        <updated>2022-05-19T15:01:55.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>工欲善其事必先利其器，一个高效和高颜值的IDE，让你编写代码的时都是赏心悦目的感觉😝。颜狗果然是颜狗</p>
+</blockquote>
+<h2 id="1-背景">1. 背景</h2>
+<p>在使用python作为开发语言的近两年时间，经历由windows-&gt;macos环境切换然后linux部署代码，来回的环境切换以及代码调试都带了极大不便，pycharm虽然推出了远程开发环境JB Gateway，但是当前版本体验捉急，bug也非常多。2022年初在使用vscode的过程中无意发现vscode也支持远程开发，一经使用便一发不可收拾，彻底爱上vscode, 也由此完全抛弃了pycharm开始使用vscode作为开发IDE.<br>
+vscode可以直接连接到远程开发机上进行开发，vscode社区丰富的插件也可以直接安装和运行在开发机中，因此在原生的linux环境中进行代码编写和调试，对于个人项目来说，从编码-&gt;测试-&gt;调试-&gt;上线可以一条龙解决，大幅度提升开发效率和体验</p>
+<h2 id="2-开发机环境搭建">2. 开发机环境搭建</h2>
+<blockquote>
+<p>Linux devbox篇，强烈推荐<br>
+system: debian11, 干净的虚机环境<br>
+python版本：^3.9.2</p>
+</blockquote>
+<h3 id="devbox-setup">devbox setup</h3>
+<ul>
+<li>切换apt源,推荐使用阿里源</li>
+</ul>
+<pre><code class="language-shell">$ sudo cat &lt;&lt;EOF &gt;/etc/apt/source.list
+&gt; deb http://mirrors.aliyun.com/debian/ bullseye main non-free contrib
+&gt; deb-src http://mirrors.aliyun.com/debian/ bullseye main non-free contrib
+&gt; deb http://mirrors.aliyun.com/debian-security/ bullseye-security main
+&gt; deb-src http://mirrors.aliyun.com/debian-security/ bullseye-security main
+&gt; deb http://mirrors.aliyun.com/debian/ bullseye-updates main non-free contrib
+&gt; deb-src http://mirrors.aliyun.com/debian/ bullseye-updates main non-free &gt; contrib
+&gt; deb http://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib
+&gt; deb-src http://mirrors.aliyun.com/debian/ bullseye-backports main non-free contrib
+&gt; EOF
+$ sudo apt update
+</code></pre>
+<ul>
+<li>install pip3</li>
+</ul>
+<pre><code>$sudo apt install python3-pip
+</code></pre>
+<p>intall git</p>
+<pre><code>$ sudo apt install git
+</code></pre>
+<ul>
+<li>install virtual evn, 个人十分推荐使用poetry作为python的virtualenv</li>
+</ul>
+<pre><code>$ pip3 install poetry( or pip3 install virtualenv)
+</code></pre>
+<ul>
+<li>install docker-ce, docker-compose，方便快速启动服务提升开发速度</li>
+</ul>
+<pre><code class="language-shell">$ sudo apt-get update
+$ sudo apt-get install \
+   ca-certificates \
+   curl \
+   gnupg \
+   lsb-release
+$ curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+$ echo \
+ &quot;deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+ $(lsb_release -cs) stable&quot; | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+$ sudo chmod a+r /usr/share/keyrings/docker-archive-keyring.gpg
+
+$ sudo apt-get update
+$ sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+
+$ sudo curl -L &quot;https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-$(uname -s)-$(uname -m)&quot; -o /usr/local/bin/docker-compose
+
+$ sudo chmod 755 /usr/local/bin/docker-compose
+</code></pre>
+<ul>
+<li>确认docker以及poetry环境是否ready</li>
+</ul>
+<pre><code class="language-shell">$ which poetry
+$ which docker-compose
+$ sudo docker ps
+</code></pre>
+<p>到此，开发机基础环境就已经ok了。</p>
+<h3 id="vscode插件安装">VSCode插件安装</h3>
+<ol>
+<li>Remote Development，用于vscode远程连接到devbox的linux环境</li>
+<li>Python</li>
+<li>Code Runner, 用于vscode直接运行python代码</li>
+<li>autoDocstring,自动生成标准化的注释</li>
+<li>Jinja，写配置模板必备</li>
+<li>YAML</li>
+<li>Tabline, 代码AI补全工具</li>
+<li>Atom One Dark Pro, 颜值即正义</li>
+</ol>
+<h4 id="番外篇vscode设置篇">番外篇，vscode设置篇</h4>
+<ol>
+<li>字体推荐：Source Code Pro, Monoca, 出门左转github，windows下载rtt文件安装。settings: font.editor设置任意字体之一</li>
+<li>自动保存: settings: autosave on focus change</li>
+<li>文件显示过滤： settings: exclued, 新增**/<strong>pycache</strong>, 移除一大推烦人的pyc文件</li>
+</ol>
+]]></content>
+    </entry>
+</feed>
